@@ -4,6 +4,7 @@
 #include <catboost/libs/monoforest/interpretation.h>
 #include <catboost/libs/monoforest/model_import.h>
 #include <catboost/libs/monoforest/polynom.h>
+#include <catboost/libs/monoforest/lasso.h>
 
 namespace NMonoForest {
     static TPolynom BuildPolynom(const TAdditiveModel<TObliviousTree>& additiveModel) {
@@ -46,5 +47,35 @@ namespace NMonoForest {
         const auto importer = MakeCatBoostImporter(fullModel);
         const TPolynom polynom = BuildPolynom(importer->GetModel());
         return ExplainFeatures(polynom, importer->GetGrid());
+    }
+
+    TVector<TVector<double>> TestPolynomLasso(
+            const TFullModel& fullModel,
+            const TVector<TVector<double>>& train_data,
+            const TVector<double>& train_labels,
+            double lambda,
+            double eps,
+            size_t maxSteps,
+            const TVector<TVector<double>>& test_data
+    ) {
+        const auto importer = MakeCatBoostImporter(fullModel);
+        TAdditiveModel<TObliviousTree> additiveModel = importer->GetModel();
+        TPolynomBuilder polynomBuilder;
+        for (auto idx : xrange(additiveModel.Size())) {
+            polynomBuilder.AddTree(additiveModel.GetWeakModel(idx));
+        }
+        TPolynom polynom = polynomBuilder.Build();
+
+        TVector<TVector<double>> res;
+
+        Cout << "BEFORE " << polynom.MonomsEnsemble.size() << " monoms" << Endl;
+        res.push_back(apply(polynom, importer->GetGrid(), test_data));
+
+        trainLasso(&polynom, train_data, train_labels, importer->GetGrid(), lambda, eps, maxSteps);
+
+        Cout << "AFTER  " << polynom.MonomsEnsemble.size() << " monoms" << Endl;
+        res.push_back(apply(polynom, importer->GetGrid(), test_data));
+
+        return res;
     }
 }

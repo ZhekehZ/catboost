@@ -25,4 +25,14 @@ namespace NMonoForest {
     TVector<THumanReadableMonom> ConvertFullModelToPolynom(const TFullModel& fullModel);
     TString ConvertFullModelToPolynomString(const TFullModel& fullModel);
     TVector<TFeatureExplanation> ExplainFeatures(const TFullModel& fullModel);
+
+    TVector<TVector<double>> TestPolynomLasso(
+            const TFullModel& fullModel,
+            const TVector<TVector<double>>& train_data,
+            const TVector<double>& train_labels,
+            double lambda,
+            double eps,
+            size_t maxSteps,
+            const TVector<TVector<double>>& test_data
+    );
 }

@@ -132,3 +132,8 @@ def plot_features_strength(model, height_per_feature=0.5, width_per_plot=5, plot
         ax.set_xlabel('Prediction value change')
 
     return fig
+
+
+def test_polynom_lasso(model, train_data, train_labels, lam, eps, maxSteps, test_data):
+    _check_model(model)
+    return _catboost.test_polynom_lasso(model._object, train_data, train_labels, lam, eps, maxSteps, test_data)

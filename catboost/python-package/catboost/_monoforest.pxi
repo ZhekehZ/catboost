@@ -53,6 +53,15 @@ cdef extern from "catboost/python-package/catboost/monoforest_helpers.h" namespa
     TString ConvertFullModelToPolynomString(const TFullModel& fullModel)
     TVector[THumanReadableMonom] ConvertFullModelToPolynom(const TFullModel& fullModel)
     TVector[TFeatureExplanation] ExplainFeatures(const TFullModel& fullModel)
+    TVector[TVector[double]] TestPolynomLasso(
+            const TFullModel& fullModel,
+            const TVector[TVector[double]]& train_data,
+            const TVector[double]& train_labels,
+            double lam,
+            double eps,
+            size_t maxSteps,
+            const TVector[TVector[double]]& test_data
+    )
 
 
 class Split:
@@ -170,3 +179,7 @@ cpdef explain_features(model):
         feature_type = "Float" if featureExpl.FeatureType == EMonoForestFeatureType_Float else "OneHot"
         result.append(FeatureExplanation(featureExpl.FeatureIdx, feature_type, list(featureExpl.ExpectedBias), borders))
     return result
+
+
+cpdef test_polynom_lasso(model, train_data, train_labels, lam, eps, maxSteps, test_data):
+    return TestPolynomLasso(dereference((<_CatBoost>model).__model), train_data, train_labels, lam, eps, maxSteps, test_data)

@@ -13,6 +13,7 @@ SRCS(
     non_symmetric_tree.cpp
     polynom.cpp
     split.cpp
+    lasso.cpp
 )
 
 PEERDIR(
